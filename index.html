@@ -4,24 +4,181 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>chengyujie.top</title>
+
 <style>
-  body{margin:0;background:#0f172a;font-family:Arial,"Microsoft YaHei";color:#fff;text-align:center}
-  h1{margin:40px 0 20px;font-size:32px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,120px);gap:18px;justify-content:center;padding:24px}
-  a{color:#fff;text-decoration:none}
-  .card{background:#1e293b;border-radius:18px;padding:18px 10px;transition:.2s;border:1px solid rgba(255,255,255,.08)}
-  .card:hover{background:#334155;transform:scale(1.05)}
+body{
+  margin:0;
+  font-family:Arial,"Microsoft YaHei";
+  background:#0f172a;
+  color:white;
+  min-height:100vh;
+  background-size:cover;
+  background-position:center;
+}
+
+h1{
+  text-align:center;
+  margin:30px 0 10px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,120px);
+  gap:20px;
+  justify-content:center;
+  padding:30px;
+}
+
+.card{
+  background:rgba(0,0,0,0.5);
+  padding:15px;
+  border-radius:18px;
+  text-align:center;
+  cursor:pointer;
+  transition:.2s;
+  user-select:none;
+}
+
+.card:hover{
+  transform:scale(1.05);
+}
+
+.add-btn{
+  position:fixed;
+  bottom:30px;
+  right:30px;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:#2563eb;
+  font-size:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+.settings{
+  position:fixed;
+  bottom:30px;
+  left:30px;
+  font-size:24px;
+  cursor:pointer;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+.modal-content{
+  background:#1e293b;
+  padding:20px;
+  border-radius:15px;
+  width:300px;
+}
+button{
+  padding:8px 12px;
+  margin-top:10px;
+}
 </style>
 </head>
+
 <body>
+
 <h1>chengyujie.top 🚀</h1>
-<div class="grid">
-  <a href="https://www.baidu.com" target="_blank" rel="noopener"><div class="card">百度</div></a>
-  <a href="https://chat.openai.com" target="_blank" rel="noopener"><div class="card">ChatGPT</div></a>
-  <a href="https://www.bilibili.com" target="_blank" rel="noopener"><div class="card">B站</div></a>
-  <a href="https://xueqiu.com" target="_blank" rel="noopener"><div class="card">雪球</div></a>
-  <a href="https://www.taobao.com" target="_blank" rel="noopener"><div class="card">淘宝</div></a>
-  <a href="https://www.youtube.com" target="_blank" rel="noopener"><div class="card">YouTube</div></a>
+<div class="grid" id="grid"></div>
+
+<div class="add-btn" onclick="openAdd()">＋</div>
+<div class="settings" onclick="changeBg()">⚙</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h3>添加网站</h3>
+    <input type="text" id="name" placeholder="名称">
+    <input type="text" id="url" placeholder="网址 https://">
+    <button onclick="addSite()">保存</button>
+    <button onclick="closeModal()">取消</button>
+  </div>
 </div>
+
+<script>
+let sites = JSON.parse(localStorage.getItem("sites")) || [
+  {name:"百度", url:"https://www.baidu.com"},
+  {name:"ChatGPT", url:"https://chat.openai.com"}
+];
+
+let bg = localStorage.getItem("bg");
+if(bg) document.body.style.backgroundImage = `url(${bg})`;
+
+function render(){
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  sites.forEach((site,index)=>{
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerText = site.name;
+    div.onclick = ()=> window.open(site.url,"_blank");
+    div.ondblclick = ()=>{
+      const newName = prompt("修改名称:",site.name);
+      if(newName){
+        sites[index].name = newName;
+        save();
+      }
+    };
+    div.oncontextmenu = (e)=>{
+      e.preventDefault();
+      if(confirm("删除这个网站？")){
+        sites.splice(index,1);
+        save();
+      }
+    };
+    grid.appendChild(div);
+  });
+}
+
+function save(){
+  localStorage.setItem("sites",JSON.stringify(sites));
+  render();
+}
+
+function openAdd(){
+  document.getElementById("modal").style.display="flex";
+}
+function closeModal(){
+  document.getElementById("modal").style.display="none";
+}
+
+function addSite(){
+  const name = document.getElementById("name").value;
+  const url = document.getElementById("url").value;
+  if(name && url){
+    sites.push({name,url});
+    save();
+    closeModal();
+  }
+}
+
+function changeBg(){
+  const url = prompt("输入背景图片URL：");
+  if(url){
+    document.body.style.backgroundImage = `url(${url})`;
+    localStorage.setItem("bg",url);
+  }
+}
+
+render();
+</script>
+
 </body>
 </html>
